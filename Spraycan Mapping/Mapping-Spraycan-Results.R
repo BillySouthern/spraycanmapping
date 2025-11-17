@@ -21,7 +21,7 @@ onedrivepath="~/OneDrive-UniversityOfOregon/"
 
 #-------------------------------------------------------------------------------
 #Load CSV data
-PPGIS_Results_untidy <- read_csv("/Users/billy/Documents/GitHub/spraycanmapping/PPGIS-Results/map-me_blobs_10-11-2025_03-08.csv")
+PPGIS_Results_untidy <- read_csv("/Users/billy/Documents/GitHub/spraycanmapping/PPGIS-Results/map-me_blobs_14-11-2025_11-50.csv")
 
 #Check values
 # Count how many submission
@@ -45,9 +45,12 @@ PPGIS_Results <- PPGIS_Results_untidy %>%
     id_question == 23278 ~ "Urban",
     id_question == 23279 ~ "Suburban",
     TRUE ~ NA_character_   )) %>%
-  st_as_sf(coords = c("lng", "lat"), crs = 4326)
+  st_as_sf(coords = c("lng", "lat"), crs = 4326) %>%
+  filter(!id_person %in% c(119202, 119207, 119219))
 
-
+#Check unique entries for a coumn
+PPGIS_Results %>%
+  distinct(id_person)
 
 
 
@@ -119,7 +122,7 @@ Spraycan_Results <- leaflet() %>%
   ) %>%  #Add Spraycan points
   addCircleMarkers(
     data = PPGIS_Results %>% filter(Answer == "Urban"),
-    radius = 5,
+    radius = 2.5,
     fillColor = "#e41a1c",
     fillOpacity = 0.5,
     stroke = FALSE,
@@ -129,7 +132,7 @@ Spraycan_Results <- leaflet() %>%
   ) %>%
   addCircleMarkers(
     data = PPGIS_Results %>% filter(Answer == "Suburban"),
-    radius = 5,
+    radius = 2.5,
     fillColor = "#377eb8",
     fillOpacity = 0.5,
     stroke = FALSE,
@@ -151,7 +154,7 @@ Spraycan_Results <- leaflet() %>%
 # Save the map
 saveWidget(
   Spraycan_Results, 
-  file = "/Users/billy/Documents/GitHub/spraycanmapping/Spraycan_Results.html",
+  file = "/Users/billy/Documents/GitHub/spraycanmapping/442_UrbSub_Results.html",
   selfcontained = FALSE)
 
 
