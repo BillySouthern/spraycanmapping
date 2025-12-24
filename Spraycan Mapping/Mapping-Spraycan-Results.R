@@ -21,7 +21,7 @@ onedrivepath="~/OneDrive-UniversityOfOregon/"
 
 #-------------------------------------------------------------------------------
 #Load CSV data
-PPGIS_Results_untidy <- read_csv("/Users/billy/Documents/GitHub/spraycanmapping/PPGIS-Results/map-me_blobs_14-11-2025_11-50.csv")
+PPGIS_Results_untidy <- read_csv("/Users/billy/Documents/GitHub/spraycanmapping/PPGIS-Results/map-me_blobs_17-11-2025_12-25.csv")
 
 #Check values
 # Count how many submission
@@ -37,6 +37,10 @@ PPGIS_Results_untidy %>%
 #  119207
 #  119219
 
+#Load dem responses
+Dem_Results <- read_csv("/Users/billy/Documents/GitHub/spraycanmapping/PPGIS-Results/map-me_dem_answers_17-11-2025_12-26.csv") %>%
+  select(id_person, dem_answer)
+
 #Create New Unique person identifier
 PPGIS_Results <- PPGIS_Results_untidy %>%
   mutate(Entry = dense_rank(id_person))%>%
@@ -46,7 +50,8 @@ PPGIS_Results <- PPGIS_Results_untidy %>%
     id_question == 23279 ~ "Suburban",
     TRUE ~ NA_character_   )) %>%
   st_as_sf(coords = c("lng", "lat"), crs = 4326) %>%
-  filter(!id_person %in% c(119202, 119207, 119219))
+  filter(!id_person %in% c(119202, 119207, 119219)) %>%
+  left_join(Dem_Results, by = "id_person")
 
 #Check unique entries for a coumn
 PPGIS_Results %>%
@@ -74,13 +79,14 @@ Lane_places <- Oregon_Places %>%
   rename(Cities = NAME)            
 
 
-# Create an interactive map
-Zoning_Atlas <- st_transform(Zoning_Atlas, 4326)
-
-
-
 # Create the leaflet map 
 Spraycan_Results <- leaflet() %>%
+  addControl(
+    html = "<b>Participatory Mapping in Urban Geography 442</b><br>
+    Students collectively mapped where they see the urban and suburban areas of Eugene. 
+      Results are aggregated and displayed with the county and city boundaries.",
+    position = "topright"  # options: "topleft", "topright", "bottomleft", "bottomright"
+  )%>%
   addMapPane(name = "polygons", zIndex = 410) %>% 
   addMapPane(name = "maplabels", zIndex = 420) %>% # higher zIndex rendered on top
   addProviderTiles("CartoDB.PositronNoLabels") %>%
@@ -109,8 +115,8 @@ Spraycan_Results <- leaflet() %>%
     data = Lane_places,
     color = "black",
     weight = 1.5,
-    fillColor = "transparent",
-    fillOpacity = 0,
+    fillColor = "lightgrey",
+    fillOpacity = 0.25,
     group = "Cities",                    # <--- add this
     options = pathOptions(pane = "polygons"),
     highlightOptions = highlightOptions(
@@ -122,8 +128,8 @@ Spraycan_Results <- leaflet() %>%
   ) %>%  #Add Spraycan points
   addCircleMarkers(
     data = PPGIS_Results %>% filter(Answer == "Urban"),
-    radius = 2.5,
-    fillColor = "#e41a1c",
+    radius = 2,
+    fillColor = "#1b9e77",
     fillOpacity = 0.5,
     stroke = FALSE,
     label = ~Answer,
@@ -132,8 +138,8 @@ Spraycan_Results <- leaflet() %>%
   ) %>%
   addCircleMarkers(
     data = PPGIS_Results %>% filter(Answer == "Suburban"),
-    radius = 2.5,
-    fillColor = "#377eb8",
+    radius = 2,
+    fillColor = "#d95f02",
     fillOpacity = 0.5,
     stroke = FALSE,
     label = ~Answer,
@@ -147,9 +153,9 @@ Spraycan_Results <- leaflet() %>%
   # Legend
   addLegend(
     position = "bottomright",
-    colors = c("#e41a1c", "#377eb8"),
+    colors = c("#1b9e77", "#d95f02"),
     labels = c("Urban", "Suburban"),
-    title = "Area Type") 
+    title = "Area Type")  
 
 # Save the map
 saveWidget(
