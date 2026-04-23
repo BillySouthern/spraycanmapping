@@ -85,7 +85,7 @@ Spraycan_Results <- leaflet() %>%
     html = "<b>Participatory Mapping in Urban Geography 442</b><br>
     Students collectively mapped where they see the urban and suburban areas of Eugene. 
       Results are aggregated and displayed with the county and city boundaries.",
-    position = "topright"  # options: "topleft", "topright", "bottomleft", "bottomright"
+    position = "bottomleft"  # options: "topleft", "topright", "bottomleft", "bottomright"
   )%>%
   addMapPane(name = "polygons", zIndex = 410) %>% 
   addMapPane(name = "maplabels", zIndex = 420) %>% # higher zIndex rendered on top
@@ -155,7 +155,7 @@ Spraycan_Results <- leaflet() %>%
     position = "bottomright",
     colors = c("#1b9e77", "#d95f02"),
     labels = c("Urban", "Suburban"),
-    title = "Area Type")  
+    title = "Landscape")  
 
 # Save the map
 saveWidget(
