@@ -21,7 +21,12 @@ onedrivepath="~/OneDrive-UniversityOfOregon/"
 
 #-------------------------------------------------------------------------------
 #Load CSV data
+#490
 PPGIS_Results_untidy <- read_csv("/Users/billy/Documents/GitHub/spraycanmapping/PPGIS-Results/map-me_blobs_17-11-2025_12-25.csv")
+
+#343
+PPGIS_Results_untidy <- read_csv("/Users/billy/Documents/GitHub/spraycanmapping/PPGIS-Results/343-Blobs.csv")
+
 
 #Check values
 # Count how many submission
@@ -50,7 +55,9 @@ PPGIS_Results <- PPGIS_Results_untidy %>%
     id_question == 23279 ~ "Suburban",
     TRUE ~ NA_character_   )) %>%
   st_as_sf(coords = c("lng", "lat"), crs = 4326) %>%
-  filter(!id_person %in% c(119202, 119207, 119219)) %>%
+  # filter(!id_person %in% c(119202, 119207, 119219)) %>%
+  filter(!id_person %in% c(124519)) %>%
+  filter(!str_starts(as.character(id_person), "11")) %>% #Remove 442
   left_join(Dem_Results, by = "id_person")
 
 #Check unique entries for a coumn
@@ -80,9 +87,9 @@ Lane_places <- Oregon_Places %>%
 
 
 # Create the leaflet map 
-Spraycan_Results <- leaflet() %>%
+Spraycan_Results_343 <- leaflet() %>%
   addControl(
-    html = "<b>Participatory Mapping in Urban Geography 442</b><br>
+    html = "<b>Participatory Mapping in GEOG:343 <i>Society, Culture, and Place</i></b><br>
     Students collectively mapped where they see the urban and suburban areas of Eugene. 
       Results are aggregated and displayed with the county and city boundaries.",
     position = "bottomleft"  # options: "topleft", "topright", "bottomleft", "bottomright"
@@ -114,7 +121,7 @@ Spraycan_Results <- leaflet() %>%
   addPolygons(
     data = Lane_places,
     color = "black",
-    weight = 1.5,
+    weight = 2,
     fillColor = "lightgrey",
     fillOpacity = 0.25,
     group = "Cities",                    # <--- add this
@@ -125,25 +132,25 @@ Spraycan_Results <- leaflet() %>%
       bringToFront = TRUE
     ),
     label = ~Cities
+  ) %>%
+  addCircleMarkers(
+    data = PPGIS_Results %>% filter(Answer == "Suburban"),
+    radius = 1.5,
+    fillColor = "#d95f02",
+    fillOpacity = 0.35,
+    stroke = FALSE,
+    label = ~Answer,
+    group = "Suburban",
+    options = pathOptions(pane = "polygons")
   ) %>%  #Add Spraycan points
   addCircleMarkers(
     data = PPGIS_Results %>% filter(Answer == "Urban"),
     radius = 2,
     fillColor = "#1b9e77",
-    fillOpacity = 0.5,
+    fillOpacity = 0.35,
     stroke = FALSE,
     label = ~Answer,
     group = "Urban",
-    options = pathOptions(pane = "polygons")
-  ) %>%
-  addCircleMarkers(
-    data = PPGIS_Results %>% filter(Answer == "Suburban"),
-    radius = 2,
-    fillColor = "#d95f02",
-    fillOpacity = 0.5,
-    stroke = FALSE,
-    label = ~Answer,
-    group = "Suburban",
     options = pathOptions(pane = "polygons")
   ) %>%
   addLayersControl(
@@ -159,8 +166,8 @@ Spraycan_Results <- leaflet() %>%
 
 # Save the map
 saveWidget(
-  Spraycan_Results, 
-  file = "/Users/billy/Documents/GitHub/spraycanmapping/442_UrbSub_Results.html",
+  Spraycan_Results_343, 
+  file = "/Users/billy/Documents/GitHub/spraycanmapping/343_UrbSub_Results.html",
   selfcontained = FALSE)
 
 
